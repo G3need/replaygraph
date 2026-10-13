@@ -1,0 +1,24 @@
+# replaygraph
+
+Deterministic replay and evaluation for LangGraph agents.
+
+An agent's behaviour is a trajectory, not a single output. If you
+cannot replay a trajectory bit-for-bit you cannot regression-test it,
+and an agent you cannot regression-test is an agent you cannot safely
+ship.
+
+Three pieces: a default-deny policy gate that authorises every tool
+call before it executes, a JSON trace format safe to commit and diff,
+and an offline replay that re-executes a recorded trajectory with no
+API key and fingerprints the result.
+
+Scoring is against observable facts — policy compliance, tool
+resolution, termination, step/token budgets, runaway-loop guards —
+not a model's opinion of itself.
+
+See README.md for the full pitch, and examples/billing_support_agent.py
+for a working LangGraph agent wrapped end to end.
+
+## Status
+
+v0.1.0 — 51 tests passing, example runs offline, CLI is CI-shaped.
