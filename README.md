@@ -145,10 +145,40 @@ commit and diff with ordinary tooling.
 `ReplayMismatch` on any call the record cannot answer, and refuses to
 execute a call the record marked as denied.
 
+## MCP support (v0.2.0)
+
+`replaygraph.mcp` gates an MCP tool server behind the same policy
+boundary as native tools. A `MCPClient` speaks JSON-RPC 2.0 over stdio
+using only the standard library (no `mcp` SDK required); `MCPToolBridge`
+wraps it so that:
+
+- **a policy-denied call never reaches the server** — the denial is
+  recorded as a fact before any network traffic leaves the machine;
+- allowed calls are recorded with their results through the *same*
+  `Recorder` path native tools use, so traces stay uniform;
+- the recorded trace replays offline with no server process running.
+
+```python
+from replaygraph import MCPClient, MCPToolBridge, Policy, Recorder
+
+client = MCPClient.from_command(["python", "my_server.py"])
+policy = Policy("strict").allow("read_file").deny("*")
+recorder = Recorder("agent", policy=policy)
+bridge = MCPToolBridge(client=client, policy=policy, recorder=recorder)
+
+result = bridge.call("read_file", {"path": "notes.md"})  # policy-gated + recorded
+```
+
+Run the end-to-end demo (spins up a real subprocess MCP server):
+
+```bash
+python examples/mcp_bridge_demo.py   # OVERALL: PASS
+```
+
 ## Tests
 
 ```bash
-python -m pytest        # 51 passed
+python -m pytest        # 57 passed
 ```
 
 The determinism guarantee is asserted directly: `test_replay.py` replays
@@ -163,9 +193,11 @@ src/replaygraph/
   replay.py            offline replay, ReplayTransport
   score.py             evals + drift detection
   langgraph_support.py Recorder, run_recorded
+  mcp.py               MCPClient + MCPToolBridge (stdlib JSON-RPC 2.0)
   cli.py               score / replay / diff / policy
 examples/billing_support_agent.py
-tests/                 51 tests, no network, no keys
+examples/mcp_bridge_demo.py
+tests/                 57 tests, no network, no keys
 ```
 
 ## License

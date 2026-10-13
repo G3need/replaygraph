@@ -27,8 +27,13 @@ from replaygraph.langgraph_support import (
     deterministic_config,
     run_recorded,
 )
+from replaygraph.mcp import (
+    MCPClient,
+    MCPToolBridge,
+    MCPToolDef,
+)
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 
 __all__ = [
     "Decision",
@@ -44,5 +49,8 @@ __all__ = [
     "Scorecard",
     "score_trace",
     "compare_traces",
+    "MCPClient",
+    "MCPToolBridge",
+    "MCPToolDef",
     "__version__",
 ]
